@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import { config } from 'dotenv';
 config();
 
-export default function checkAuth(req, res, next) {
+export default function strictAuth(req, res, next) {
     const token = (req.headers.authorization || '').replace(/Bearer\s/, '');
     if (token) {
         try {
@@ -11,9 +11,13 @@ export default function checkAuth(req, res, next) {
             next();
         } catch (err) {
             console.log(err.message);
-            next();
+            return res.status(403).json({
+                message: 'Not authenticated.'
+            });
         }
     } else {
-        next();
+        return res.status(403).json({
+            message: 'Not authenticated.'
+        });
     }
 }

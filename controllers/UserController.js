@@ -64,7 +64,7 @@ export async function login(req, res) {
 export async function getMe(req, res) {
     try {
         const { userId } = req;
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).populate('posts');
         if (!user) {
             return res.status(404).json({ message: 'User not found or has been deleted.' });
         }
