@@ -8,6 +8,9 @@ config();
 export async function create_post(req, res) {
     try {
         const { text, file_name } = req.body;
+        if(!text){
+            return res.status(400).json({message: 'Text required.'});
+        }
         const { userId } = req;
         const user = await User.findById(userId);
         if (!user) {
@@ -39,7 +42,6 @@ export async function create_post(req, res) {
 
         await newPost.save();
         await user.save();
-
         return res.status(201).json({ newPost });
     } catch (err) {
         console.log(err);
@@ -76,7 +78,7 @@ export async function handle_like(req, res) {
         const { userId } = req;
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(400).json({ message: 'Not authenticated.' });
+            return res.status(403).json({ message: 'Not authenticated.' });
         }
         const post = await Post.findById(postId).populate('author');
         if (!post) {
@@ -96,10 +98,25 @@ export async function handle_like(req, res) {
     }
 }
 
-export async function test(req, res) {
+export async function delete_post(req, res) {
     try {
-        const { image } = req.body;
-        return res.json(req.body);
+        const {post_id} = req.body;
+        const {userId} = req;
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(403).json({ message: 'Not authenticated.' });
+        }
+        const post = await Post.findById(post_id);
+        if(!post){
+            return res.status(404).json({ message: 'Post not found.' });
+        }
+        const post_index = user.posts.indexOf(post_id);
+        if(post_index !== -1){
+            user.posts.splice(post_index, 1);
+            await user.save();
+        }
+        await Post.findByIdAndDelete(post_id);
+        return res.json({message: 'Post successfully deleted.'});
     } catch (err) {
         console.log(err);
         return res.status(500).json({ message: err.message || 'Internal server error.' });

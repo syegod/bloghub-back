@@ -50,8 +50,8 @@ app.get('/auth/get-all-users', UserController.getAllUsers);
 app.post('/posts', strictAuth, upload.single('image'), PostController.create_post);
 app.get('/posts', checkAuth, PostController.get_posts);
 app.patch('/posts', strictAuth, PostController.handle_like);
+app.delete('/posts', strictAuth, PostController.delete_post);
 
-app.post('/test', upload.single('image'), PostController.test);
 
 app.listen(process.env.PORT || 8000, () => {
     console.log('Server is started...');
